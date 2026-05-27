@@ -1,0 +1,43 @@
+name: Deploy para GitHub Pages
+
+# 1. Quando o deploy deve acontecer?
+on: 
+  push: 
+    branches: ["main"] # Toda vez que o CI passar e o código for para a main
+  workflow_dispatch:   # Permite rodar manualmente clicando em um botão
+
+# 2. Permissões de segurança vitais para o deploy funcionar
+permissions: 
+  contents: read 
+  pages: write 
+  id-token: write
+
+# 3. Evita que dois deploys ocorram ao mesmo tempo
+concurrency: 
+  group: "pages" 
+  cancel-in-progress: true 
+
+# 4. O trabalho real
+jobs: 
+  deploy:
+    name: Publicar Site
+    runs-on: ubuntu-latest 
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }} # Pega a URL gerada no final
+
+    steps: 
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar o ambiente do GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: Fazer upload da nossa pasta de arquivos
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './site' # Apontamos especificamente para a pasta criada na Etapa 1
+
+      - name: Realizar o Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
