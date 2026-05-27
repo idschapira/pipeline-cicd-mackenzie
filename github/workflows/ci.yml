@@ -1,0 +1,42 @@
+name: CI - Integração Contínua
+
+# 1. Quando esse pipeline deve rodar?
+# R: Toda vez que houver um "push" (envio de código) para a branch main.
+on:
+  push:
+    branches:
+      - main
+
+# 2. O que ele deve fazer? (Jobs)
+jobs:
+  build-and-test:
+    name: Teste e Validação
+    runs-on: ubuntu-latest # Cria uma máquina virtual Linux novinha para nós
+
+    steps:
+      # Passo A: Baixar o seu código para dentro da máquina virtual
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      # Passo B: Rodar o teste em Shell Script
+      - name: Validar estrutura do site
+        run: |
+          echo "Iniciando a bateria de testes..."
+          
+          # Teste 1: Verifica se o arquivo index.html existe na pasta correta
+          if [ -f "site/index.html" ]; then
+            echo "✅ SUCESSO: O arquivo site/index.html foi encontrado!"
+          else
+            echo "❌ ERRO: O arquivo site/index.html NÃO existe. Verifique a estrutura de pastas."
+            exit 1
+          fi
+
+          # Teste 2: Verifica se o arquivo é um HTML válido (contém a tag <html>)
+          if grep -qi "<html" site/index.html; then
+            echo "✅ SUCESSO: O arquivo possui uma estrutura HTML válida!"
+          else
+            echo "❌ ERRO: A tag HTML obrigatória não foi encontrada no arquivo."
+            exit 1
+          fi
+          
+          echo "🚀 Todos os testes passaram! CI concluído com sucesso."
